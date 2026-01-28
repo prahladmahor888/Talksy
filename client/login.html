@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talksy - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .auth-card {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .auth-card h2 {
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .toggle-text {
+            margin-top: 20px;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .toggle-text a {
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-background"></div>
+
+    <nav class="navbar">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none; color: inherit;"><i class="fa-solid fa-video"></i>
+                Talksy</a>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="features.html">Features</a>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <!-- Login Form -->
+        <div class="auth-card" id="loginForm">
+            <h2>Welcome Back</h2>
+            <div class="error-msg" id="loginError"></div>
+            <div class="form-group">
+                <input type="email" id="loginEmail" class="text-input" placeholder="Email Address">
+            </div>
+            <div class="form-group">
+                <input type="password" id="loginPassword" class="text-input" placeholder="Password">
+            </div>
+            <button class="btn-primary" id="loginBtn">Login</button>
+            <p class="toggle-text">Don't have an account? <a onclick="toggleAuth()">Sign Up</a></p>
+        </div>
+
+        <!-- Register Form -->
+        <div class="auth-card" id="registerForm" style="display: none;">
+            <h2>Create Account</h2>
+            <div class="error-msg" id="registerError"></div>
+            <div class="form-group">
+                <input type="text" id="regUsername" class="text-input" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <input type="email" id="regEmail" class="text-input" placeholder="Email Address">
+            </div>
+            <div class="form-group">
+                <input type="password" id="regPassword" class="text-input" placeholder="Create Password">
+            </div>
+            <button class="btn-primary" id="registerBtn">Sign Up</button>
+            <p class="toggle-text">Already have an account? <a onclick="toggleAuth()">Login</a></p>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+</body>
+
+</html>

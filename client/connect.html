@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talksy - Video Chat</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-background"></div>
+
+    <!-- Main App UI -->
+    <div class="main-container" id="mainApp">
+        <div class="split-video-container">
+            <!-- Remote Video (Stranger) -->
+            <div class="video-box remote-box">
+                <div class="video-label"><i class="fa-solid fa-user-secret"></i> Stranger</div>
+                <video id="remoteVideo" autoplay playsinline></video>
+                <div class="status-overlay" id="statusOverlay">
+                    <div class="loader"></div>
+                    <p id="statusText">Connecting...</p>
+                </div>
+                <!-- Partner overlay -->
+                <div class="partner-info hidden" id="partnerInfo">
+                    <h3 id="partnerName">Stranger</h3>
+                    <p id="partnerLocation"><i class="fa-solid fa-location-dot"></i> Unknown</p>
+                </div>
+            </div>
+
+            <!-- Local Video (You) -->
+            <div class="video-box local-box">
+                <div class="video-label"><i class="fa-solid fa-user"></i> You</div>
+                <video id="localVideo" autoplay playsinline muted></video>
+            </div>
+        </div>
+
+        <div class="chat-sidebar">
+            <div class="chat-header">
+                <h3>Chat</h3>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages go here -->
+                <div class="system-msg">Welcome to Talksy!</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type a message..." disabled>
+                <button id="sendBtn" disabled><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <div class="control-bar">
+            <button id="toggleMicBtn" class="control-btn"><i class="fa-solid fa-microphone"></i></button>
+            <button id="toggleCamBtn" class="control-btn"><i class="fa-solid fa-video"></i></button>
+            <button id="addFriendBtn" class="control-btn" title="Add Friend"
+                style="display:none; color:#22c55e; border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.1);">
+                <i class="fa-solid fa-user-plus"></i>
+            </button>
+            <button id="nextBtn" class="control-btn next-btn">Next <i class="fa-solid fa-forward"></i></button>
+            <button id="stopBtn" class="control-btn stop-btn"><i class="fa-solid fa-phone-slash"></i></button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="connect.js"></script>
+</body>
+
+</html>

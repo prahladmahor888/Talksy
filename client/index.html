@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talksy - Connect Instantly</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-background"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-video"></i> Talksy
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="active">Home</a>
+            <a href="features.html">Features</a>
+            <a href="safety.html">Safety</a>
+            <a href="about.html">About</a>
+        </div>
+        <div class="nav-actions">
+            <a href="login.html" class="btn-secondary" style="text-decoration: none;">Login</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Meet Strangers,<br>Make Friends.</h1>
+            <p>Experience random video chat like never before. Instant connections, crystal clear video, and complete
+                anonymity.</p>
+
+            <!-- Entry Card (Formerly Modal) -->
+            <div class="entry-card">
+                <h3>Start Chatting Now</h3>
+
+                <div class="form-group">
+                    <input type="text" id="nameInput" class="text-input" placeholder="Your Nickname" autocomplete="off">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <input type="text" id="countryInput" class="text-input" placeholder="Country">
+                    </div>
+                    <div class="form-group half">
+                        <input type="text" id="cityInput" class="text-input" placeholder="City">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>I am:</label>
+                    <div class="gender-select small">
+                        <button class="gender-btn active" data-value="male">Male</button>
+                        <button class="gender-btn" data-value="female">Female</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Looking for:</label>
+                    <div class="interest-select small">
+                        <button class="interest-btn" data-value="male">Male</button>
+                        <button class="interest-btn" data-value="female">Female</button>
+                        <button class="interest-btn active" data-value="any">Any</button>
+                    </div>
+                </div>
+
+                <button id="enterBtn" class="btn-primary glow-effect">Start Video Chat <i
+                        class="fa-solid fa-arrow-right"></i></button>
+                <p class="terms">By clicking Start, you agree to our Terms & Safety Guidelines.</p>
+            </div>
+        </div>
+
+        <div class="hero-image-container">
+            <div class="hero-card glass-card">
+                <img src="hero.png" alt="People connecting" class="hero-img">
+                <div class="floating-badge badge-1"><i class="fa-solid fa-user-check"></i> 50k+ Online</div>
+                <div class="floating-badge badge-2"><i class="fa-solid fa-shield-halved"></i> Safe & Secure</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="section-header">
+            <h2>Why Choose Talksy?</h2>
+            <p>The best way to meet new people around the world.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon-box"><i class="fa-solid fa-bolt"></i></div>
+                <h3>Fast Connections</h3>
+                <p>No waiting rooms. Get matched instantly with people online.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon-box"><i class="fa-solid fa-user-secret"></i></div>
+                <h3>Fully Anonymous</h3>
+                <p>No login required. Your identity is safe with us.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon-box"><i class="fa-solid fa-earth-americas"></i></div>
+                <h3>Global Reach</h3>
+                <p>Connect with users from over 100+ countries offering diverse cultures.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon-box"><i class="fa-solid fa-video"></i></div>
+                <h3>HD Video</h3>
+                <p>Crystal clear peer-to-peer video quality for the best experience.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Talksy &copy; 2026</div>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Us</a>
+            </div>
+            <div class="social-links">
+                <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="home.js"></script>
+</body>
+
+</html>
