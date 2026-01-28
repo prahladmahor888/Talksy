@@ -1,4 +1,127 @@
-const socket = io();
+// detect if we are on localhost or strict ssl
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+// --- Polling Manager (Simulates Socket.io for Serverless) ---
+class PollManager {
+    constructor() {
+        this.socketId = 'user_' + Math.floor(Math.random() * 10000000);
+        this.pollInterval = null;
+        this.listeners = {};
+        this.partnerId = null;
+    }
+
+    on(event, callback) {
+        if (!this.listeners[event]) this.listeners[event] = [];
+        this.listeners[event].push(callback);
+    }
+
+    emit(event, data) {
+        // Map abstract events to API calls
+        if (event === 'start_chat') {
+            this.joinQueue(data);
+        } else if (event === 'next') {
+            this.leaveQueue(() => this.joinQueue(data));
+        } else if (['offer', 'answer', 'ice-candidate', 'message'].includes(event)) {
+            this.sendSignal(event, data);
+        } else if (event === 'friend_request') {
+            // Not implemented in poll mode yet
+            alert('Friend requests not supported in serverless mode yet.');
+        }
+    }
+
+    // --- API Calls ---
+    async joinQueue(data) {
+        try {
+            const res = await fetch('/api/queue/join', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...data, socketId: this.socketId })
+            });
+            const result = await res.json();
+
+            if (result.status === 'matched') {
+                this.partnerId = result.data.partner.id;
+                this.trigger('matched', result.data);
+            } else {
+                this.trigger('waiting');
+            }
+            this.startPolling();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async leaveQueue(callback) {
+        try {
+            await fetch('/api/queue/leave', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ socketId: this.socketId })
+            });
+            this.partnerId = null;
+            if (callback) callback();
+        } catch (e) { console.error(e); }
+    }
+
+    async sendSignal(type, payload) {
+        if (!this.partnerId) return;
+        try {
+            await fetch('/api/queue/signal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    from: this.socketId,
+                    to: this.partnerId,
+                    type,
+                    payload: type === 'message' ? { text: payload } : payload
+                })
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    startPolling() {
+        if (this.pollInterval) clearInterval(this.pollInterval);
+        this.pollInterval = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/queue/poll/${this.socketId}`);
+                if (!res.ok) return;
+                const data = await res.json();
+
+                // Sync Partner ID if not set
+                if (data.partnerId && !this.partnerId) {
+                    this.partnerId = data.partnerId;
+                }
+
+                // Process Inbox
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        if (msg.type === 'matched') {
+                            this.partnerId = msg.payload.partner.socketId || msg.payload.partner.id;
+                            this.trigger('matched', msg.payload);
+                        } else if (msg.type === 'message') {
+                            this.trigger('message', msg.payload); // payload has {text: '...'}
+                        } else if (msg.type === 'partner_left') {
+                            this.trigger('partner_left');
+                        } else {
+                            // Signaling
+                            this.trigger(msg.type, msg.payload);
+                        }
+                    });
+                }
+            } catch (e) { console.error('Poll error', e); }
+        }, 1000); // Poll every 1 second
+    }
+
+    trigger(event, data) {
+        if (this.listeners[event]) {
+            this.listeners[event].forEach(cb => cb(data));
+        }
+    }
+}
+
+// Instantiate Polling Manager (Replaces Socket.io)
+const socket = new PollManager();
+
 
 // DOM Elements
 const localVideo = document.getElementById('localVideo');
@@ -62,23 +185,45 @@ function updateControls(connected) {
     chatInput.disabled = !connected;
     sendBtn.disabled = !connected;
     nextBtn.disabled = false;
-}
 
-// --- Initialization ---
-async function init() {
-    try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localVideo.srcObject = localStream;
-        startSearch();
-    } catch (err) {
-        alert("Camera/Microphone access required!");
-        console.error(err);
-        window.location.href = '/index.html';
+    // Reset remote video if disconnected
+    if (!connected) {
+        remoteVideo.srcObject = null;
     }
 }
 
-// Start immediately
-init();
+// --- Initialization ---
+let hasPermissions = false;
+
+async function requestPermissions() {
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = localStream;
+        hasPermissions = true;
+
+        // Hide start overlay if I add one
+        const startOverlay = document.getElementById('startOverlay');
+        if (startOverlay) startOverlay.style.display = 'none';
+
+        startSearch();
+    } catch (err) {
+        alert("Camera and Microphone access IS REQUIRED to use Talksy. Please allow access.");
+        console.error(err);
+        // window.location.href = '/index.html'; // Don't redirect immediately, let them try again
+    }
+}
+
+// Don't auto-start. Wait for user.
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if we have a start button (I will add this to HTML)
+    const startBtn = document.getElementById('enableCameraBtn');
+    if (startBtn) {
+        startBtn.addEventListener('click', requestPermissions);
+    } else {
+        // Fallback for logic consistency
+        requestPermissions();
+    }
+});
 
 // --- Core Logic ---
 
@@ -99,7 +244,9 @@ function createPeerConnection() {
     if (peerConnection) peerConnection.close();
     peerConnection = new RTCPeerConnection(config);
 
-    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    if (localStream) {
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    }
 
     peerConnection.ontrack = (event) => {
         remoteVideo.srcObject = event.streams[0];
@@ -155,7 +302,8 @@ nextBtn.addEventListener('click', () => {
     updateControls(false);
     setStatus('Skipping... Searching for new partner...');
 
-    chatMessages.innerHTML = '<div class="system-msg">New Chat Started</div>';
+    chatMessages.innerHTML = '';
+    addMessage('New Chat Started', 'system');
 
     socket.emit('next', {
         gender: selectedGender,
@@ -210,35 +358,13 @@ videoGrid.addEventListener('touchend', e => {
 });
 
 
-// --- Socket Events ---
+// --- Socket (Polling) Events ---
 socket.on('waiting', () => {
     setStatus('Waiting for someone to join...');
 });
 
 socket.on('matched', async ({ initiator, partner }) => {
     setStatus('Found a match! Connecting...');
-
-    // Show friend button if logged in
-    const addFriendBtn = document.getElementById('addFriendBtn');
-    if (localStorage.getItem('talksy_user')) {
-        addFriendBtn.style.display = 'block';
-        addFriendBtn.disabled = false;
-
-        // Save partner ID if available
-        if (partner && partner.id) {
-            addFriendBtn.onclick = () => {
-                const myUser = JSON.parse(localStorage.getItem('talksy_user'));
-                socket.emit('friend_request', {
-                    from: myUser.id,
-                    to: partner.id
-                });
-                alert('Friend request sent!');
-                addFriendBtn.disabled = true;
-            };
-        }
-    } else {
-        addFriendBtn.style.display = 'none';
-    }
 
     if (partner) {
         partnerName.textContent = partner.name || 'Stranger';
@@ -257,10 +383,6 @@ socket.on('matched', async ({ initiator, partner }) => {
             console.error(e);
         }
     }
-});
-
-socket.on('friend_request_received', () => {
-    alert("You received a friend request! (Check Profile to accept - TODO)");
 });
 
 socket.on('offer', async (offer) => {
